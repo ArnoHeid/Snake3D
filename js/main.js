@@ -10,11 +10,8 @@ var foodMaterial = new THREE.MeshLambertMaterial( {
     } );
 var food = new THREE.Mesh(foodGeometry, foodMaterial);
 food.position.x = Math.floor(Math.random() * ((cubeSize/2 - 1) + (cubeSize/2 - 1 + 1)) - (cubeSize/2));
-console.log(food.position.x);
 food.position.y = Math.floor(Math.random() * ((cubeSize/2 - 1) + (cubeSize/2 - 1 + 1)) - (cubeSize/2));
-console.log(food.position.y);
 food.position.z = Math.floor(Math.random() * ((cubeSize/2 - 1) + (cubeSize/2 - 1 + 1)) - (cubeSize/2));
-console.log(food.position.z);
 return food;
 }
 function init() {
@@ -25,14 +22,16 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMapEnabled = true;
 
-
     // create a playgroundCube
     var playgroundCubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+   
     var playgroundCubeMaterial = new THREE.MeshLambertMaterial( {
             color: 0xffffff,
-            opacity: 0.7,
+            opacity: 0.5,
             transparent: true,
     } );
+    playgroundCubeGeometry.faces[6].color = new THREE.Color(0x6F00FF); //Bottom 1
+    playgroundCubeGeometry.faces[7].color = new THREE.Color(0x530070); //Bottom 2
     var playgroundCube = new THREE.Mesh(playgroundCubeGeometry, playgroundCubeMaterial);
     var rotateCamera = true;
     var addNewFood = true;
@@ -43,33 +42,51 @@ function init() {
     // add the cube to the scene
     scene.add(playgroundCube);
 
+
+    var planeGeometry = new THREE.PlaneGeometry(cubeSize, cubeSize, cubeSize);
+    var planeMaterial = new THREE.MeshLambertMaterial({ color: 0x6F00FF });
+    var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.material.side = THREE.DoubleSide;
+    plane.rotation.x =  Math.PI / 2;
+    plane.position.x = 0;
+    plane.position.y = -cubeSize/2;
+    plane.position.z = 0;
+    playgroundCube.add(plane);
+
+
     //Create space background is a large sphere
-    var spacetex = THREE.ImageUtils.loadTexture('space.jpg');
-    var spacesphereGeo = new THREE.SphereGeometry(60,60,60);
-    var spacesphereMat = new THREE.MeshPhongMaterial();
-    spacesphereMat.map = spacetex;
-    var spacesphere = new THREE.Mesh(spacesphereGeo,spacesphereMat);
+    var spacetexture = THREE.ImageUtils.loadTexture('space.jpg');
+    var spacesphereGeometry = new THREE.SphereGeometry(60,60,60);
+    var spacesphereMaterial = new THREE.MeshPhongMaterial();
+    spacesphereMaterial.map = spacetexture;
+    var spacesphere = new THREE.Mesh(spacesphereGeometry, spacesphereMaterial);
     //spacesphere needs to be double sided 
     spacesphere.material.side = THREE.DoubleSide;
     spacesphere.material.map.wrapS = THREE.RepeatWrapping;
     spacesphere.material.map.wrapT = THREE.RepeatWrapping;
-    spacesphere.material.map.repeat.set( 5, 3);
+    spacesphere.material.map.repeat.set(5, 3);
     scene.add(spacesphere);
 
     // position and point the camera to the center of the scene
     camera.position.x = 0;
-    camera.position.y = 30;
+    camera.position.y = 0;
     camera.position.z = -50;
     camera.lookAt(scene.position);
 
     // add subtle ambient lighting
     var ambientLight = new THREE.AmbientLight(0x0c0c0c);
     scene.add(ambientLight);
-    // add spotlight for the shadows
+    // add spotlight for scene
     var spotLight = new THREE.SpotLight(0xffffff);
     spotLight.position.set(-40, 60, -10);
     spotLight.castShadow = true;
     scene.add(spotLight);
+
+    // add spotlight in cube
+    var spotLightCube = new THREE.SpotLight(0xffffff);
+    spotLightCube.position.set(-40, 0, -40);
+    spotLightCube.castShadow = true;
+    scene.add(spotLightCube);
 
     // add the output of the renderer to the html element
     document.getElementById("WebGL-output"). append(renderer.domElement);
@@ -81,8 +98,10 @@ function init() {
         instructions.style.display = 'none';
         blocker.style.display = 'none';
         // set camera in block
-        camera.position.y = 10;
-         camera.position.z = -20; 
+        camera.rotation.y = 30 * Math.PI/180;
+        camera.position.x = 15;
+        camera.position.y = 0;
+        camera.position.z = -25; 
         // stop rotation
         rotateCamera = false;
     }, false );
