@@ -1,18 +1,46 @@
 var camera, scene, renderer;
 window.onload = init;
 var cubeSize = 20;
+
+function showSnake() {
+    //Create space background is a large sphere
+    var snakeHeadTexture = THREE.ImageUtils.loadTexture('snakehead.jpg');
+    var snakeHeadGeometry = new THREE.SphereGeometry(1,5,5);
+    var snakeHeadMaterial = new THREE.MeshPhongMaterial();
+    snakeHeadMaterial.map = snakeHeadTexture;
+    var snakeHead = new THREE.Mesh(snakeHeadGeometry, snakeHeadMaterial);
+    snakeHead.material.side = THREE.DoubleSide;
+    snakeHead.material.map.wrapS = THREE.RepeatWrapping;
+    snakeHead.material.map.wrapT = THREE.RepeatWrapping;
+    snakeHead.material.map.repeat.set(1, 1);
+    snakeHead.position.y = -cubeSize/2 + 2;
+    scene.add(snakeHead);
+
+
+    var snaketexture = THREE.ImageUtils.loadTexture('snakeskin.jpg');
+    var snakeGeometry = new THREE.SphereGeometry(1,5,5);
+    var snakeMaterial = new THREE.MeshPhongMaterial();
+    snakeMaterial.map = snaketexture;
+    var snake = new THREE.Mesh(snakeGeometry, snakeMaterial);
+    snake.material.map.wrapS = THREE.RepeatWrapping;
+    snake.material.map.wrapT = THREE.RepeatWrapping;
+    snake.material.map.repeat.set(1, 1);
+    snake.position.x = -1;
+    snakeHead.add(snake);
+    return snakeHead;
+}
 function getNewFood() {
-var foodGeometry = new THREE.BoxGeometry(1, 1, 1);
-var foodMaterial = new THREE.MeshLambertMaterial( {
-        color: 0x315DFF,
-        opacity: 1.0,
-        transparent: false
-    } );
-var food = new THREE.Mesh(foodGeometry, foodMaterial);
-food.position.x = Math.floor(Math.random() * ((cubeSize/2 - 1) + (cubeSize/2 - 1 + 1)) - (cubeSize/2));
-food.position.y = Math.floor(Math.random() * ((cubeSize/2 - 1) + (cubeSize/2 - 1 + 1)) - (cubeSize/2));
-food.position.z = Math.floor(Math.random() * ((cubeSize/2 - 1) + (cubeSize/2 - 1 + 1)) - (cubeSize/2));
-return food;
+    var foodGeometry = new THREE.BoxGeometry(1, 1, 1);
+    var foodMaterial = new THREE.MeshLambertMaterial( {
+            color: 0x315DFF,
+            opacity: 1.0,
+            transparent: false
+        } );
+    var food = new THREE.Mesh(foodGeometry, foodMaterial);
+    food.position.x = Math.floor(Math.random() * ((cubeSize/2 - 1) + (cubeSize/2 - 1 + 1)) - (cubeSize/2));
+    food.position.y = Math.floor(Math.random() * ((cubeSize/2 - 1) + (cubeSize/2 - 1 + 1)) - (cubeSize/2));
+    food.position.z = Math.floor(Math.random() * ((cubeSize/2 - 1) + (cubeSize/2 - 1 + 1)) - (cubeSize/2));
+    return food;
 }
 function init() {
     scene = new THREE.Scene();
@@ -35,6 +63,7 @@ function init() {
     var playgroundCube = new THREE.Mesh(playgroundCubeGeometry, playgroundCubeMaterial);
     var rotateCamera = true;
     var addNewFood = true;
+    var addSnake = true;
     // position the cube
     playgroundCube.position.x = 0;
     playgroundCube.position.y = 0;
@@ -98,8 +127,8 @@ function init() {
         instructions.style.display = 'none';
         blocker.style.display = 'none';
         // set camera in block
-        camera.rotation.y = 30 * Math.PI/180;
-        camera.position.x = 15;
+        camera.rotation.y = 45 * Math.PI/180;
+        camera.position.x = 10;
         camera.position.y = 0;
         camera.position.z = -25; 
         // stop rotation
@@ -111,12 +140,17 @@ function init() {
         requestAnimationFrame(render);
         // check rotation
         if (rotateCamera) {
-        spacesphere.rotation.y += 0.001;
-                    }
+            spacesphere.rotation.y += 0.001;
+        }
         // check if new food has to be added
         if (addNewFood) {
-        scene.add(getNewFood());
+            scene.add(getNewFood());
             addNewFood = false;
+        }
+
+        if (addSnake) {
+            scene.add(showSnake());
+            addSnake = false;
         }
         renderer.render(scene, camera);
     }
