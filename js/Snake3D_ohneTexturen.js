@@ -307,19 +307,23 @@ function init() {
 	function spawnSpaceTrees() {
      
 		var geometry = new THREE.BoxBufferGeometry( 1, 1, 1 );
-		var material = new THREE.MeshBasicMaterial( {color: 0xffff00, transparent: true, opacity: 1} );
+		var material = new THREE.MeshBasicMaterial( {color: 0xffff00, transparent: true, opacity: 0} );
 		var spaceTree = new THREE.Mesh( geometry, material );
 
 		spaceTree.position.x = Math.floor((Math.random() * ((cubeSize/2 - 1.5)*2)) - (cubeSize/2 - 2.5));
     	spaceTree.position.y = 0.75 - 10 ;
     	spaceTree.position.z = Math.floor((Math.random() * ((cubeSize/2 - 1.5)*2)) - (cubeSize/2 - 2.5));
-
-    	if (spaceTree.position.x == snakeHead.position.x || spaceTree.position.y == snakeHead.position.z || spaceTree.position.y == snakeHead.position.z) {
-    		log.console("Hier")
-    		spaceTree.position.x += 5;
-    		spaceTree.position.y += 5;
+    	
+    	//Always get world coordinates --> not working
+    	spaceTree.updateMatrixWorld();
+		var vector = new THREE.Vector3();
+		vector.setFromMatrixPosition( spaceTree.matrixWorld );
+		console.log("1",vector);
+    	if(checkForSnake(vector)){
+    		spaceTree.position.x = spaceTree.position.x + 3;
+    		spaceTree.position.y = spaceTree.position.y + 3;
     	}
-		
+    	    
     	var geometry = new THREE.SphereGeometry(2, 10, 10);
 		var material = new THREE.MeshToonMaterial({
  		 shininess: 70
@@ -327,29 +331,62 @@ function init() {
 		var sphere = new THREE.Mesh( geometry, material );
 		sphere.position.set(.05, 1, .05);
 		var randomColor = Math.floor((Math.random() * (spaceTreeColors.length)));
-		console.log(randomColor);
 		sphere.material.color.setHex( spaceTreeColors[randomColor] );
 		sphere.castShadow = true;
+
+		scene.updateMatrixWorld();
+		vector = sphere.matrixWorld.multiplyVector3( new THREE.Vector3() );
+
+		console.log("2",vector);
+    	if(checkForSnake(vector)){
+    		spaceTree.position.x = spaceTree.position.x + 3;
+    		spaceTree.position.y = spaceTree.position.y + 3;
+    	}
+
 		spaceTree.add(sphere);
 		collidableMeshList.push(sphere)
 		  
 		var newSphere = sphere.clone();
 		newSphere.scale.set(.85, .85, .85);
 		newSphere.position.set(.025,4, .05);
-		sphere.castShadow = true;
+
+		sphere.updateMatrixWorld();
+		vector.setFromMatrixPosition( newSphere.matrixWorld );
+		console.log(vector);
+    	if(checkForSnake(vector)){
+    		spaceTree.position.x = spaceTree.position.x + 3;
+    		spaceTree.position.y = spaceTree.position.y + 3;
+    	}
+
+		spaceTree.add(newSphere);
+		collidableMeshList.push(newSphere)
+
+		var newSphere = sphere.clone();
+		newSphere.scale.set(.65, .65, .65);
+		newSphere.position.set(0, 6.5, .05);
+
+		sphere.updateMatrixWorld();
+		vector.setFromMatrixPosition( newSphere.matrixWorld );
+    	if(checkForSnake(vector)){
+    		console.log("Hier")
+    		spaceTree.position.x = spaceTree.position.x + 3;
+    		spaceTree.position.y = spaceTree.position.y + 3;
+    	}
+
 		spaceTree.add(newSphere);
 		collidableMeshList.push(newSphere)
 		  
 		var newSphere = sphere.clone();
-		newSphere.scale.set(.65, .65, .65);
-		newSphere.position.set(0, 6.5, .05);
-		sphere.castShadow = true;
-		spaceTree.add(newSphere);
-		  
-		var newSphere = sphere.clone();
 		newSphere.scale.set(.45, .45, .45);
 		newSphere.position.set(0, 8.5, .05);
-		sphere.castShadow = true;
+
+		sphere.updateMatrixWorld();
+		vector.setFromMatrixPosition( newSphere.matrixWorld );
+    	if(checkForSnake(vector)){
+    		spaceTree.position.x = spaceTree.position.x + 3;
+    		spaceTree.position.y = spaceTree.position.y + 3;
+    	}
+
 		spaceTree.add(newSphere);
 		collidableMeshList.push(newSphere)
 		  
@@ -357,11 +394,28 @@ function init() {
 		collidableMeshList.push(spaceTree)
 		spaceTree.name = "SpaceTree"
 		  //activeObjects.push(spaceTree);
-		 return spaceTree;
+		return spaceTree;
 		
 	
-	}
-	
+}
+
+function checkForSnake(vector) {
+		x = vector.x;
+		y = vector.y;
+		z = vector.z;
+		sx = (snakeHead.position.x);
+		sy = (snakeHead.position.y);
+		sz = (snakeHead.position.z);
+
+		//console.log(x, snakeHead.position.x, y, snakeHead.position.y, z, snakeHead.position.z );
+		if (x == sx && y == sy && z == sz) {
+			console.log("Hier");
+    		return true;
+    	} else {
+    		console.log("false");
+    		return false;
+    	}
+}
 	//	Collision Check
 	function collision() {
 	
@@ -446,7 +500,8 @@ function init() {
 			collision();
 		} else {
 			controls.movementSpeed = 0;
-			window.alert("You bit off more than you can chew! :(");
+			console.log("outsch");
+			//window.alert("You bit off more than you can chew! :(");
 		}
 		//Update the camera view
 		var delta = clock.getDelta();
