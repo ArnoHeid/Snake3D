@@ -11,6 +11,7 @@ var windowWidth;
 var	windowHeight;
 var spaceTreeColors = [ 0xa17c04, 0xffa500, 0x0205fa, 0xf8093b, 0x93f154, 0x93f154];
 var firstTime = true;
+var foodCount = 0;
 
 var deathCount = 1;
 
@@ -379,6 +380,7 @@ function init() {
 				collidableMeshList.splice(collidableMeshListIndex,1);
 				scene.remove(scene.getObjectById(FoodID));
 				addToTail();
+				foodCount += 1;
 				scene.add(getNewFood());
 				scene.add(snakeHead);
 				}
@@ -457,6 +459,9 @@ function init() {
         if (addNewFood) {
             scene.add(getNewFood());
             addNewFood = false;
+        }
+        if (foodCount%5 == 1) {
+        	spawnSpaceTree = true;
         }
 
         if (spawnSpaceTree) {
