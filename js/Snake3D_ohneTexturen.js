@@ -414,7 +414,7 @@ function checkForSnake(vector) {
 		sz = (snakeHead.position.z);
 
 		//console.log(x, snakeHead.position.x, y, snakeHead.position.y, z, snakeHead.position.z );
-		if (x == sx && y == sy && z == sz) {
+		if ( Math.abs(x - sx) < 2.1 && Math.abs(y - sy) < 2.1 && Math.abs(z - sz) < 2.1 ) {
 			console.log("Hier");
     		return true;
     	} else {
