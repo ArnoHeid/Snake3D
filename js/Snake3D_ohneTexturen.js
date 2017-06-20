@@ -33,7 +33,7 @@ var deathCount = 1;
 		width: 0.3,
 		height: 0.5,
 		background: new THREE.Color().setRGB( 0.7, 0.5, 0.5 ),
-		eye: [ 0, 50, 0 ],
+		eye: [ 0, 36, 0 ],
 		up: [ 0, 0, 1 ],
 		fov: 45,
 		updateCamera: function ( camera, scene, obj) {
@@ -61,7 +61,18 @@ var deathCount = 1;
 
 
 function init() {
+	
 	document.getElementById("info").innerHTML = "Zaehler: " + deathCount;
+	
+	var gameover = document.getElementById( 'gameover' );
+	var gameoverblocker = document.getElementById( 'gameoverblocker' );
+	
+	gameover.addEventListener( 'click', function (event) {
+		gameover.style.display = 'none';
+		gameoverblocker.style.display = 'none';
+		window.location.reload();
+	}, false );
+	
 	var clock = new THREE.Clock();
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(45 , window.innerWidth / window.innerHeight , 0.1, 1000);
@@ -390,8 +401,9 @@ function init() {
 			collision();
 		} else {
 			controls.movementSpeed = 0;
-
-			window.alert("You bit off more than you can chew! :(");
+			gameoverblocker.style.display = 'block';
+			gameover.style.display = 'block';
+			//window.alert("You bit off more than you can chew! :(");
 		}
 		//Update the camera view
 		var delta = clock.getDelta();
