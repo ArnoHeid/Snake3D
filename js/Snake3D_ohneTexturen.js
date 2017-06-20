@@ -11,7 +11,6 @@ var windowWidth;
 var	windowHeight;
 
 
-
 	var views = [
 	{
 		left: 0,
@@ -21,8 +20,8 @@ var	windowHeight;
 		background: new THREE.Color().setRGB( 0.5, 0.5, 0.7 ),
 		eye: [ 0, 30, 18 ],
 		up: [ 0, 1, 0 ],
-		fov: 60,
-		updateCamera: function ( camera, scene ) {
+		fov: 70,
+		updateCamera: function ( camera, scene, obj ) {
 		  //camera.position.x += mouseX * 0.05;
 		  //camera.position.x = Math.max( Math.min( camera.position.x, 2000 ), -2000 );
 		  camera.lookAt( scene.position );
@@ -37,7 +36,7 @@ var	windowHeight;
 		eye: [ 0, 18, 0 ],
 		up: [ 0, 0, 1 ],
 		fov: 45,
-		updateCamera: function ( camera, scene) {
+		updateCamera: function ( camera, scene, obj) {
 		  //camera.position.x -= mouseX * 0.05;
 		  //camera.position.x = Math.max( Math.min( camera.position.x, 2000 ), -2000 );
 		  camera.lookAt( camera.position.clone().setY( 0 ) );
@@ -52,7 +51,7 @@ var	windowHeight;
 		eye: [ 7, 4, 7 ],
 		up: [ 0, 1, 0 ],
 		fov: 30,
-		updateCamera: function ( camera, scene ) {
+		updateCamera: function ( camera, scene, obj ) {
 		  //camera.position.y -= mouseX * 0.05;
 		  //camera.position.y = Math.max( Math.min( camera.position.y, 1600 ), -1600 );
 		  camera.lookAt( scene.position );
@@ -98,14 +97,14 @@ function init() {
     snake.material.map.wrapS = THREE.RepeatWrapping;
     snake.material.map.wrapT = THREE.RepeatWrapping;
     snake.material.map.repeat.set(1, 1);
-    snake.position.x = -1; 
+    snake.position.z = 1; 
 
     var test = new THREE.SphereGeometry(1,1,1)
 
     var testGeometry = new THREE.SphereGeometry(1,5,5);
     var testMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
     var test = new THREE.Mesh(testGeometry, testMaterial);
-    test.position.x = 4;
+    test.position.z = -4;
 
     snakeHead.add(test);
 
@@ -270,7 +269,7 @@ function init() {
     snakePart.material.map.wrapS = THREE.RepeatWrapping;
     snakePart.material.map.wrapT = THREE.RepeatWrapping;
     snakePart.material.map.repeat.set(1, 1);
-    snakePart.position.x = -1; 
+    snakePart.position.z = 1; 
     lastAddedSnakePart.add(snakePart);
 	// add the snakeparts to collidable Objects
 	lastAddedSnakePart = snakePart;
@@ -347,7 +346,7 @@ function init() {
 			view = views[ii];
 			camera = view.camera;
 
-			view.updateCamera( camera, scene);
+			view.updateCamera( camera, scene, test);
 
 			var left   = Math.floor( windowWidth  * view.left );
 			var bottom = Math.floor( windowHeight * view.bottom );
