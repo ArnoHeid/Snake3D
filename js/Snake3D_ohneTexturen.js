@@ -9,6 +9,9 @@ var collidableMeshList = [];
 var collidableMeshListIndex;
 var windowWidth;
 var	windowHeight;
+var spaceTreeColors = [ 0xa17c04, 0xffa500, 0x0205fa, 0xf8093b, 0x93f154, 0x93f154];
+var firstTime = true;
+var collides = false;
 
 
 	var views = [
@@ -77,9 +80,8 @@ function init() {
     var snakeHeadMaterial = new THREE.MeshPhongMaterial();
     snakeHeadMaterial.map = snakeHeadTexture;
     var snakeHead = new THREE.Mesh(snakeHeadGeometry, snakeHeadMaterial);
-	
-    snakeHead.material.map.wrapS = THREE.RepeatWrapping;
-    snakeHead.material.map.wrapT = THREE.RepeatWrapping;
+	snakeHeadTexture.wrapS = THREE.RepeatWrapping; // You do not need to set `.wrapT` in this case
+	snakeHeadTexture.offset.x = -( 2 * Math.PI );	
     snakeHead.material.map.repeat.set(1, 1);
     snakeHead.name ="Snake";
     snakeHead.position.y = -cubeSize/2 + 2;
@@ -162,19 +164,19 @@ function init() {
     var planeGeometry = new THREE.PlaneGeometry(cubeSize, cubeSize, cubeSize);
     var planeMaterial = new THREE.MeshLambertMaterial({
             color: 0x6F00FF,
-            opacity: 0,
+            opacity: 0.8,
             transparent: true,
     });
     var plane = new THREE.Mesh(planeGeometry, planeMaterial);
     plane.material.side = THREE.DoubleSide;
     plane.rotation.x =  Math.PI / 2;
     plane.position.x = 0;
-    plane.position.y = -cubeSize/2;
+    plane.position.y = -cubeSize/2 + 0.02;
     plane.position.z = 0;
-    //playgroundCube.add(plane);
-	//scene.add(plane);
+    playgroundCube.add(plane);
+	scene.add(plane);
 	// add the plane to collidable Objects
-	//collidableMeshList.push(plane);
+	collidableMeshList.push(plane);
 
 
     //Create space background is a large sphere
@@ -216,16 +218,13 @@ function init() {
     pointLightCube.castShadow = true;
     playgroundCube.add(pointLightCube);
     
-
-    //playgroundCube.material.side = THREE.DoubleSide;
     var rotateCamera = true;
     var addNewFood = true;
     var addSnake = true;
+    var spawnSpaceTree = true;
     // add the output of the renderer to the html element
-    //document.getElementById("WebGL-output"). append(renderer.domElement);
 	container = document.createElement( 'div' );
 	document.body.appendChild( container );
-	
 	
 	// Fly Controls
 	controls = new THREE.FlyControls( snakeHead );
@@ -292,9 +291,10 @@ function init() {
             transparent: false
         } );
     var food = new THREE.Mesh(foodGeometry, foodMaterial);
-    food.position.x = Math.floor(Math.random() * ((cubeSize/2 - 1) + (cubeSize/2 - 1 + 1)) - (cubeSize/2));
-    food.position.y = Math.floor(Math.random() * ((cubeSize/2 - 1) + (cubeSize/2 - 1 + 1)) - (cubeSize/2));
-    food.position.z = Math.floor(Math.random() * ((cubeSize/2 - 1) + (cubeSize/2 - 1 + 1)) - (cubeSize/2));
+
+    food.position.x = Math.floor((Math.random() * ((cubeSize/2 - 1.5)*2)) - (cubeSize/2 - 1.5));
+    food.position.y = Math.floor((Math.random() * ((cubeSize/2 - 1.5)*2)) - (cubeSize/2 - 1.5));
+    food.position.z = Math.floor((Math.random() * ((cubeSize/2 - 1.5)*2)) - (cubeSize/2 - 1.5));
 	food.name = "Food";
 	FoodID = food.id;
 	collidableMeshList.push(food);	// adds food as a collidable object
@@ -303,7 +303,61 @@ function init() {
 	}
 
 	function spawnSpaceTrees() {
-		//TODO
+     
+		var geometry = new THREE.BoxBufferGeometry( 1, 1, 1 );
+		var material = new THREE.MeshBasicMaterial( {color: 0xffff00, transparent: true, opacity: 1} );
+		var spaceTree = new THREE.Mesh( geometry, material );
+
+		spaceTree.position.x = Math.floor((Math.random() * ((cubeSize/2 - 1.5)*2)) - (cubeSize/2 - 2.5));
+    	spaceTree.position.y = 0.75 - 10 ;
+    	spaceTree.position.z = Math.floor((Math.random() * ((cubeSize/2 - 1.5)*2)) - (cubeSize/2 - 2.5));
+
+    	if (spaceTree.position.x == snakeHead.position.x || spaceTree.position.y == snakeHead.position.z || spaceTree.position.y == snakeHead.position.z) {
+    		log.console("Hier")
+    		spaceTree.position.x += 5;
+    		spaceTree.position.y += 5;
+    	}
+		
+    	var geometry = new THREE.SphereGeometry(2, 10, 10);
+		var material = new THREE.MeshToonMaterial({
+ 		 shininess: 70
+		});
+		var sphere = new THREE.Mesh( geometry, material );
+		sphere.position.set(.05, 1, .05);
+		var randomColor = Math.floor((Math.random() * (spaceTreeColors.length)));
+		console.log(randomColor);
+		sphere.material.color.setHex( spaceTreeColors[randomColor] );
+		sphere.castShadow = true;
+		spaceTree.add(sphere);
+		collidableMeshList.push(sphere)
+		  
+		var newSphere = sphere.clone();
+		newSphere.scale.set(.85, .85, .85);
+		newSphere.position.set(.025,4, .05);
+		sphere.castShadow = true;
+		spaceTree.add(newSphere);
+		collidableMeshList.push(newSphere)
+		  
+		var newSphere = sphere.clone();
+		newSphere.scale.set(.65, .65, .65);
+		newSphere.position.set(0, 6.5, .05);
+		sphere.castShadow = true;
+		spaceTree.add(newSphere);
+		  
+		var newSphere = sphere.clone();
+		newSphere.scale.set(.45, .45, .45);
+		newSphere.position.set(0, 8.5, .05);
+		sphere.castShadow = true;
+		spaceTree.add(newSphere);
+		collidableMeshList.push(newSphere)
+		  
+		spaceTree.scale.set(.75, .75, .75) 
+		collidableMeshList.push(spaceTree)
+		spaceTree.name = "SpaceTree"
+		  //activeObjects.push(spaceTree);
+		 return spaceTree;
+		
+	
 	}
 	
 	//	Collision Check
@@ -387,7 +441,6 @@ function init() {
 			collision();
 		} else {
 			controls.movementSpeed = 0;
-
 			window.alert("You bit off more than you can chew! :(");
 		}
 		//Update the camera view
@@ -401,6 +454,18 @@ function init() {
         if (addNewFood) {
             scene.add(getNewFood());
             addNewFood = false;
+        }
+
+        if (spawnSpaceTree) {
+            scene.add(spawnSpaceTrees());
+            if (firstTime) {
+            	scene.add(spawnSpaceTrees());
+            	scene.add(spawnSpaceTrees());
+            	scene.add(spawnSpaceTrees());
+            	scene.add(spawnSpaceTrees());
+            	firstTime = false;
+            }
+            spawnSpaceTree = false;
         }
 
         /*if (addSnake) {
