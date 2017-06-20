@@ -78,14 +78,12 @@ function init() {
     snakeHeadMaterial.map = snakeHeadTexture;
     var snakeHead = new THREE.Mesh(snakeHeadGeometry, snakeHeadMaterial);
 	
-    //snakeHead.material.side = THREE.DoubleSide;
     snakeHead.material.map.wrapS = THREE.RepeatWrapping;
     snakeHead.material.map.wrapT = THREE.RepeatWrapping;
     snakeHead.material.map.repeat.set(1, 1);
     snakeHead.name ="Snake";
     snakeHead.position.y = -cubeSize/2 + 2;
 
-    //snakeHead.name = "SnakeHead";
 	collidableMeshList.push(snakeHead);
 
     var snaketexture = THREE.ImageUtils.loadTexture('snakeskin.jpg');
@@ -138,6 +136,8 @@ function init() {
             color: 0xffffff,
             opacity: 0.4,
             transparent: true,
+            shading: THREE.FlatShading,
+            outline: true,
     } );
     var playgroundCube = new THREE.Mesh(playgroundCubeGeometry, playgroundCubeMaterial);
     playgroundCube.material.side = THREE.DoubleSide;
@@ -147,6 +147,14 @@ function init() {
     playgroundCube.position.z = 0;
     // add the cube to the scene
     scene.add(playgroundCube);
+	//add edges
+	var edges= new THREE.EdgesGeometry( playgroundCubeGeometry ); // or WireframeGeometry( geometry )
+	var edgeMaterial = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 2 } );
+	var cubeEdges = new THREE.LineSegments( edges, edgeMaterial );
+	scene.add( cubeEdges );
+
+
+
 	// add the cube to collidable Objects
 	collidableMeshList.push(playgroundCube);
 
@@ -203,10 +211,10 @@ function init() {
     spotLightCube.castShadow = true;
     playgroundCube.add(spotLightCube);
 
-    var spotLightCube2 = new THREE.SpotLight(0xffffff);
-    spotLightCube2.position.set(0, 0, 0);
-    spotLightCube2.castShadow = true;
-    playgroundCube.add(spotLightCube2);
+    var pointLightCube = new THREE.PointLight(0xffffff);
+    pointLightCube.position.set(0, 0, 0);
+    pointLightCube.castShadow = true;
+    playgroundCube.add(pointLightCube);
     
 
     //playgroundCube.material.side = THREE.DoubleSide;
@@ -293,6 +301,10 @@ function init() {
 	collidableMeshListIndex = collidableMeshList.length - 1;
     return food;
 	}
+
+	function spawnSpaceTrees() {
+		//TODO
+	}
 	
 	//	Collision Check
 	function collision() {
@@ -375,6 +387,7 @@ function init() {
 			collision();
 		} else {
 			controls.movementSpeed = 0;
+
 			window.alert("You bit off more than you can chew! :(");
 		}
 		//Update the camera view
