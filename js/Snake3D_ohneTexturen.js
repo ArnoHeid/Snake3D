@@ -9,7 +9,7 @@ var collidableMeshList = [];
 var collidableMeshListIndex;
 var windowWidth;
 var	windowHeight;
-
+var deathCount = 1;
 
 	var views = [
 	{
@@ -33,7 +33,7 @@ var	windowHeight;
 		width: 0.3,
 		height: 0.5,
 		background: new THREE.Color().setRGB( 0.7, 0.5, 0.5 ),
-		eye: [ 0, 18, 0 ],
+		eye: [ 0, 50, 0 ],
 		up: [ 0, 0, 1 ],
 		fov: 45,
 		updateCamera: function ( camera, scene, obj) {
@@ -48,7 +48,7 @@ var	windowHeight;
 		width: 0.3,
 		height: 0.5,
 		background: new THREE.Color().setRGB( 0.5, 0.7, 0.7 ),
-		eye: [ 7, 4, 7 ],
+		eye: [ 0, 0, 50 ],
 		up: [ 0, 1, 0 ],
 		fov: 30,
 		updateCamera: function ( camera, scene, obj ) {
@@ -61,6 +61,7 @@ var	windowHeight;
 
 
 function init() {
+	document.getElementById("info").innerHTML = "Zaehler: " + deathCount;
 	var clock = new THREE.Clock();
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(45 , window.innerWidth / window.innerHeight , 0.1, 1000);
@@ -99,7 +100,7 @@ function init() {
 
     var test = new THREE.SphereGeometry(1,1,1)
 
-    var testGeometry = new THREE.SphereGeometry(1,5,5);
+    var testGeometry = new THREE.SphereGeometry(0.2,5,5);
     var testMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
     var test = new THREE.Mesh(testGeometry, testMaterial);
     test.position.z = -4;
@@ -329,6 +330,8 @@ function init() {
 				}
 			else {
 				YouBitTheWrongStuff = true;
+				document.getElementById("info").text = "Zaehler: " + deathCount;
+				deathCount++;
 				}
 			}
 		}	
