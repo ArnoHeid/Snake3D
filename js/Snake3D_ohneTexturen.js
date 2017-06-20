@@ -65,24 +65,56 @@ function init() {
 	var clock = new THREE.Clock();
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(45 , window.innerWidth / window.innerHeight , 0.1, 1000);
-    var renderer = new THREE.WebGLRenderer();
+    var renderer = new THREE.WebGLRenderer({ 
+        alpha: true,
+      });
     renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMapEnabled = true;
 	
-	    //Create space background is a large sphere
-    //var snakeHeadTexture = THREE.ImageUtils.loadTexture('snakehead.jpg');
+	//Create head of snake with texture
+    var snakeHeadTexture = THREE.ImageUtils.loadTexture('snakehead.jpg');
     var snakeHeadGeometry = new THREE.SphereGeometry(1,5,5);
-    var snakeHeadMaterial = new THREE.MeshBasicMaterial(new THREE.Color(0xEEEEEE, 0.0));
-    //snakeHeadMaterial.map = snakeHeadTexture;
+    var snakeHeadMaterial = new THREE.MeshPhongMaterial();
+    snakeHeadMaterial.map = snakeHeadTexture;
     var snakeHead = new THREE.Mesh(snakeHeadGeometry, snakeHeadMaterial);
-	snakeHead.name = "SnakeHead";
-    /* snakeHead.material.side = THREE.DoubleSide;
+	
+    //snakeHead.material.side = THREE.DoubleSide;
     snakeHead.material.map.wrapS = THREE.RepeatWrapping;
     snakeHead.material.map.wrapT = THREE.RepeatWrapping;
     snakeHead.material.map.repeat.set(1, 1);
-    snakeHead.position.y = -cubeSize/2 + 2; */
+    snakeHead.name ="Snake";
+    snakeHead.position.y = -cubeSize/2 + 2;
+
+    //snakeHead.name = "SnakeHead";
 	collidableMeshList.push(snakeHead);
+
+    var snaketexture = THREE.ImageUtils.loadTexture('snakeskin.jpg');
+    var snakeGeometry = new THREE.SphereGeometry(1,5,5);
+    var snakeMaterial = new THREE.MeshPhongMaterial();
+    snakeMaterial.map = snaketexture;
+    var snake = new THREE.Mesh(snakeGeometry, snakeMaterial);
+	snake.name = "SnakeFirstPart";
+    snake.material.map.wrapS = THREE.RepeatWrapping;
+    snake.material.map.wrapT = THREE.RepeatWrapping;
+    snake.material.map.repeat.set(1, 1);
+    snake.position.x = -1; 
+
+    var test = new THREE.SphereGeometry(1,1,1)
+
+    var testGeometry = new THREE.SphereGeometry(1,5,5);
+    var testMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
+    var test = new THREE.Mesh(testGeometry, testMaterial);
+    test.position.x = 4;
+
+    snakeHead.add(test);
+
+    snakeHead.add(snake);
+	// add the snakeparts to collidable Objects
+	//collidableMeshList.push(snake);
+	lastAddedSnakePart = snake;
+	scene.add(snakeHead);
+
 
 	//Kameras
 	for (var ii =  0; ii < views.length; ++ii ) {
@@ -97,37 +129,19 @@ function init() {
 		view.camera = camera;
 	}
 
+	camera = views[0].camera;
 
-    //var snaketexture = THREE.ImageUtils.loadTexture('snakeskin.jpg');
-    var snakeGeometry = new THREE.SphereGeometry(1,5,5);
-    var snakeMaterial = new THREE.MeshPhongMaterial();
-    //snakeMaterial.map = snaketexture;
-    var snake = new THREE.Mesh(snakeGeometry, snakeMaterial);
-	snake.name = "SnakeFirstPart";
-    /* snake.material.map.wrapS = THREE.RepeatWrapping;
-    snake.material.map.wrapT = THREE.RepeatWrapping;
-    snake.material.map.repeat.set(1, 1);
-    snake.position.x = -1; */
-    snakeHead.add(snake);
-	// add the snakeparts to collidable Objects
-	collidableMeshList.push(snake);
-	lastAddedSnakePart = snake;
-	scene.add(snakeHead);
 
     // create a playgroundCube
     var playgroundCubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
    
     var playgroundCubeMaterial = new THREE.MeshLambertMaterial( {
             color: 0xffffff,
-            opacity: 0.5,
+            opacity: 0.4,
             transparent: true,
     } );
-    playgroundCubeGeometry.faces[6].color = new THREE.Color(0x6F00FF); //Bottom 1
-    playgroundCubeGeometry.faces[7].color = new THREE.Color(0x530070); //Bottom 2
     var playgroundCube = new THREE.Mesh(playgroundCubeGeometry, playgroundCubeMaterial);
-    var rotateCamera = true;
-    var addNewFood = true;
-    var addSnake = true;
+    playgroundCube.material.side = THREE.DoubleSide;
     // position the cube
     playgroundCube.position.x = 0;
     playgroundCube.position.y = 0;
@@ -139,30 +153,34 @@ function init() {
 
 
     var planeGeometry = new THREE.PlaneGeometry(cubeSize, cubeSize, cubeSize);
-    var planeMaterial = new THREE.MeshLambertMaterial({ color: 0x6F00FF });
+    var planeMaterial = new THREE.MeshLambertMaterial({
+            color: 0x6F00FF,
+            opacity: 0,
+            transparent: true,
+    });
     var plane = new THREE.Mesh(planeGeometry, planeMaterial);
     plane.material.side = THREE.DoubleSide;
     plane.rotation.x =  Math.PI / 2;
     plane.position.x = 0;
     plane.position.y = -cubeSize/2;
     plane.position.z = 0;
-    playgroundCube.add(plane);
-	scene.add(plane);
+    //playgroundCube.add(plane);
+	//scene.add(plane);
 	// add the plane to collidable Objects
-	collidableMeshList.push(plane);
+	//collidableMeshList.push(plane);
 
 
     //Create space background is a large sphere
-    //var spacetexture = THREE.ImageUtils.loadTexture('space.jpg');
+    var spacetexture = THREE.ImageUtils.loadTexture('space.jpg');
     var spacesphereGeometry = new THREE.SphereGeometry(60,60,60);
     var spacesphereMaterial = new THREE.MeshPhongMaterial();
-    //spacesphereMaterial.map = spacetexture;
+    spacesphereMaterial.map = spacetexture;
     var spacesphere = new THREE.Mesh(spacesphereGeometry, spacesphereMaterial);
     //spacesphere needs to be double sided 
-    /* spacesphere.material.side = THREE.DoubleSide;
+    spacesphere.material.side = THREE.DoubleSide;
     spacesphere.material.map.wrapS = THREE.RepeatWrapping;
     spacesphere.material.map.wrapT = THREE.RepeatWrapping;
-    spacesphere.material.map.repeat.set(5, 3); */
+    spacesphere.material.map.repeat.set(5, 3); 
     scene.add(spacesphere);
 
     // position and point the camera to the center of the scene
@@ -182,10 +200,20 @@ function init() {
 
     // add spotlight in cube
     var spotLightCube = new THREE.SpotLight(0xffffff);
-    spotLightCube.position.set(-40, 0, -40);
+    spotLightCube.position.set(0, -100, 0);
     spotLightCube.castShadow = true;
-    scene.add(spotLightCube);
+    playgroundCube.add(spotLightCube);
 
+    var spotLightCube2 = new THREE.SpotLight(0xffffff);
+    spotLightCube2.position.set(0, 0, 0);
+    spotLightCube2.castShadow = true;
+    playgroundCube.add(spotLightCube2);
+    
+
+    //playgroundCube.material.side = THREE.DoubleSide;
+    var rotateCamera = true;
+    var addNewFood = true;
+    var addSnake = true;
     // add the output of the renderer to the html element
     //document.getElementById("WebGL-output"). append(renderer.domElement);
 	container = document.createElement( 'div' );
@@ -233,19 +261,18 @@ function init() {
 	}
 	
 	function addToTail() {
-	//var snaketexture = THREE.ImageUtils.loadTexture('snakeskin.jpg');
+	var snaketexture = THREE.ImageUtils.loadTexture('snakeskin.jpg');
     var snakeGeometry = new THREE.SphereGeometry(1,5,5);
     var snakeMaterial = new THREE.MeshPhongMaterial();
-    //snakeMaterial.map = snaketexture;
+    snakeMaterial.map = snaketexture;
     var snakePart = new THREE.Mesh(snakeGeometry, snakeMaterial);
 	snakePart.name = "SnakePartX";
-    /* snakePart.material.map.wrapS = THREE.RepeatWrapping;
+    snakePart.material.map.wrapS = THREE.RepeatWrapping;
     snakePart.material.map.wrapT = THREE.RepeatWrapping;
     snakePart.material.map.repeat.set(1, 1);
-    snakePart.position.x = -1; */
+    snakePart.position.x = -1; 
     lastAddedSnakePart.add(snakePart);
 	// add the snakeparts to collidable Objects
-	collidableMeshList.push(snakePart);
 	lastAddedSnakePart = snakePart;
 	}
 	
